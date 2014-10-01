@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:cxf="http://cxf.apache.org/core"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+        http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:component-scan base-package="demo.cxf.restful.service"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <!--<import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml"/> NOT NEEDED ANYMORE IN NEWER CXF VERSIONS -->
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <!-- TODO: RESTFUL Service -->
+    <jaxrs:server id="bookShelfRESTService" address="/">
+        <jaxrs:features>
+            <cxf:logging/>
+        </jaxrs:features>
+
+        <jaxrs:serviceBeans>
+            <ref bean="bookService"/>
+            <ref bean="booksService"/>
+            <ref bean="categoryService"/>
+            <ref bean="categoriesService"/>
+            <ref bean="booksForCategoryService"/>
+        </jaxrs:serviceBeans>
+
+        <jaxrs:providers>
+            <bean class="org.apache.cxf.jaxrs.provider.json.JSONProvider">
+                <property name="dropRootElement" value="true"/>
+                <property name="supportUnwrapped" value="true"/>
+            </bean>
+        </jaxrs:providers>
+    </jaxrs:server>
+    <!-- End of RESTFUL Service -->
+
+    <!-- SOAP Service -->
+    <jaxws:endpoint implementor="#categoryServiceImplementation"
+                    implementorClass="demo.cxf.restful.service.CategoryService"
+                    address="/bookshelf/categorysoapservice">
+        <jaxws:features>
+            <cxf:logging/>
+        </jaxws:features>
+    </jaxws:endpoint>
+    <!-- End of RESTFUL Service -->
+
+
+    <bean id="bookService" class="demo.cxf.restful.service.BookService">
+        <constructor-arg name="bookShelfDAO">
+            <ref bean="bookShelfDAO"/>
+        </constructor-arg>
+    </bean>
+    <bean id="booksService" class="demo.cxf.restful.service.BooksService">
+        <constructor-arg name="bookShelfDAO">
+            <ref bean="bookShelfDAO"/>
+        </constructor-arg>
+    </bean>
+    <bean id="categoryService" class="demo.cxf.restful.service.CategoryService">
+    </bean>
+    <bean id="categoriesService" class="demo.cxf.restful.service.CategoriesService">
+        <constructor-arg name="bookShelfDAO">
+            <ref bean="bookShelfDAO"/>
+        </constructor-arg>
+    </bean>
+    <bean id="booksForCategoryService" class="demo.cxf.restful.service.BooksForCategoryService">
+        <constructor-arg name="bookShelfDAO">
+            <ref bean="bookShelfDAO"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="bookShelfDAO" class="demo.cxf.restful.dao.BookShelfDAO" scope="singleton"/>
+
+</beans>
